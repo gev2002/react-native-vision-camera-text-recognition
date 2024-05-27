@@ -10,7 +10,7 @@ class VisionCameraTextRecognitionPackage : ReactPackage {
    companion object {
     init {
       FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanText") {proxy,options ->
-        TestProjGModule(proxy,options)
+        VisionCameraTextRecognitionModule(proxy,options)
       }
     }
   }
