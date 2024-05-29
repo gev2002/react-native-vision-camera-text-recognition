@@ -7,7 +7,8 @@ import MLKitCommon
 @objc(VisionCameraTextRecognition)
 public class VisionCameraTextRecognition: FrameProcessorPlugin {
 
-    private static var textRecognizer = TextRecognizer.textRecognizer()
+    private static let latinOptions = TextRecognizerOptions()
+    private let textRecognizer = TextRecognizer.textRecognizer(options:latinOptions)
 
     public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
         super.init(proxy: proxy, options: options)
@@ -21,7 +22,7 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
 
         var result: Text
         do {
-            result = try TextRecognizer.textRecognizer()
+            result = try self.textRecognizer
                 .results(in: image)
         } catch let error {
             print("Failed to recognize text with error: \(error.localizedDescription).")

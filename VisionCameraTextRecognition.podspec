@@ -18,6 +18,6 @@ Pod::Spec.new do |s|
 
   s.dependency "React-Core"
   s.dependency "VisionCamera"
-  s.dependency "GoogleMLKit/TextRecognition", "2.2.0"
+  s.dependency "GoogleMLKit/TextRecognition"
 
 end
