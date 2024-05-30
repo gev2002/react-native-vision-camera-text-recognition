@@ -9,7 +9,7 @@ export type {
 export type { ForwardedRef } from 'react';
 import type { CameraProps, Frame } from 'react-native-vision-camera';
 export interface TextRecognitionOptions {
-  language: 'latin';
+  language: 'latin' | 'chinese' | 'devanagari' | 'japanese' | 'korean';
 }
 
 export type TextData = {

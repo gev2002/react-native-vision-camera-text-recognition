@@ -3,7 +3,6 @@ package com.visioncameratextrecognition
 import android.graphics.Point
 import android.graphics.Rect
 import android.media.Image
-import android.util.Log
 import com.facebook.react.bridge.WritableNativeArray
 import com.facebook.react.bridge.WritableNativeMap
 import com.google.android.gms.tasks.Task
@@ -11,6 +10,10 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
+import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
+import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
+import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.mrousavy.camera.frameprocessors.Frame
 import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin
@@ -20,7 +23,24 @@ import java.util.HashMap
 
 class VisionCameraTextRecognitionModule(proxy : VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
 
- private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+
+   private var recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+   private val latinOptions = TextRecognizerOptions.DEFAULT_OPTIONS
+   private val chineseOptions = ChineseTextRecognizerOptions.Builder().build()
+   private val devanagariOptions = DevanagariTextRecognizerOptions.Builder().build()
+   private val japaneseOptions = JapaneseTextRecognizerOptions.Builder().build()
+   private val koreanOptions = KoreanTextRecognizerOptions.Builder().build()
+    init {
+    val language = options?.get("language")
+    recognizer = when (language) {
+      "latin" -> TextRecognition.getClient(latinOptions)
+      "chinese" -> TextRecognition.getClient(chineseOptions)
+      "devanagari" -> TextRecognition.getClient(devanagariOptions)
+      "japanese" -> TextRecognition.getClient(japaneseOptions)
+      "korean" -> TextRecognition.getClient(koreanOptions)
+      else -> TextRecognition.getClient(latinOptions)
+    }
+  }
   override fun callback(frame: Frame, arguments: Map<String, Any>?) : HashMap<String, Any>? {
 
     val result = WritableNativeMap()

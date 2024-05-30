@@ -2,21 +2,44 @@ import Foundation
 import VisionCamera
 import MLKitVision
 import MLKitTextRecognition
+import MLKitTextRecognitionChinese
+import MLKitTextRecognitionDevanagari
+import MLKitTextRecognitionJapanese
+import MLKitTextRecognitionKorean
 import MLKitCommon
 
 @objc(VisionCameraTextRecognition)
 public class VisionCameraTextRecognition: FrameProcessorPlugin {
 
+    private var textRecognizer  = TextRecognizer()
     private static let latinOptions = TextRecognizerOptions()
-    private let textRecognizer = TextRecognizer.textRecognizer(options:latinOptions)
+    private static let chineseOptions = ChineseTextRecognizerOptions()
+    private static let devanagariOptions = DevanagariTextRecognizerOptions()
+    private static let japaneseOptions = JapaneseTextRecognizerOptions()
+    private static let koreanOptions = KoreanTextRecognizerOptions()
+
 
     public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
         super.init(proxy: proxy, options: options)
+        let language = options["language"]! as! String
+        if language == "latin" {
+            self.textRecognizer =  TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.latinOptions)
+        }else if language == "chinese"{
+            self.textRecognizer =  TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.chineseOptions)
+        }else if language == "devanagari"{
+            self.textRecognizer = TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.devanagariOptions)
+        }else if language == "japanese"{
+            self.textRecognizer = TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.japaneseOptions)
+        }else if language == "korean"{
+            self.textRecognizer = TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.koreanOptions)
+        }
+        else {
+            self.textRecognizer =  TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.latinOptions)
+        }
     }
 
     public override func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any {
-
-        let buffer = frame.buffer
+                let buffer = frame.buffer
         let image = VisionImage(buffer: buffer)
         image.orientation = getOrientation(orientation: frame.orientation)
 

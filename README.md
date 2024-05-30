@@ -72,10 +72,10 @@ function App() {
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet'
     const data = scanText(frame)
-	console.log(data, 'data')
+    console.log(data, 'data')
   }, [])
   return (
-      <>
+    <>
       {!!device && (
         <Camera
           style={StyleSheet.absoluteFill}
@@ -84,7 +84,7 @@ function App() {
           frameProcessor={frameProcessor}
         />
       )}
-      </>
+    </>
   );
 }
 export default App;
@@ -94,9 +94,9 @@ export default App;
 ---
 ## ⚙️ Options
 
-|   Name   |  Type    |                 Values                 | Default |
-|:--------:| :---: |:--------------------------------------:|:-------:|
-| language | string | latin |  latin  |
+|   Name   |  Type    |                    Values                    | Default  |
+|:--------:| :---: |:--------------------------------------------:|:--------:|
+| language | string | latin, chinese, devanagari, japanese, korean |  latin  |
 
 
 
