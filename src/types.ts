@@ -13,25 +13,42 @@ export interface TextRecognitionOptions {
 }
 
 export type TextData = {
-  blockFrameBottom: number;
-  blockFrameLeft: number;
-  blockFrameRight: number;
-  blockFrameTop: number;
-  blockText: string;
-  elementFrameBottom: number;
-  elementFrameLeft: number;
-  elementFrameRight: number;
-  elementFrameTop: number;
-  elementText: string;
-  lineFrameBottom: number;
-  lineFrameLeft: number;
-  lineFrameRight: number;
-  lineFrameTop: number;
-  lineText: string;
-  resultText: string;
-  size: number;
+  result: {
+    blocks: [] | BlocksData;
+    text: string;
+  };
+};
+type BlocksData = [
+  cornerPoints: CornerPoints,
+  frame: FrameType,
+  lines: LinesType,
+  recognizedLanguages: string[] | [],
+];
+
+type CornerPoints = [{ x: number; y: number }];
+
+type FrameType = {
+  boundingCenterX: number;
+  boundingCenterY: number;
+  height: number;
+  width: number;
+  x: number;
+  y: number;
 };
 
+type LinesType = [
+  cornerPoints: CornerPoints,
+  elements: ElementsType,
+  frame: FrameType,
+  recognizedLanguages: string[],
+  text: string,
+];
+
+type ElementsType = [
+  cornerPoints: CornerPoints,
+  frame: FrameType,
+  text: string,
+];
 export interface Text {
   [key: number | string]: TextData;
 }
