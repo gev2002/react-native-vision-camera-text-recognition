@@ -8,9 +8,79 @@ export type {
 } from 'react-native-vision-camera';
 export type { ForwardedRef } from 'react';
 import type { CameraProps, Frame } from 'react-native-vision-camera';
-export interface TextRecognitionOptions {
+
+type Languages =
+  | 'afrikaans'
+  | 'albanian'
+  | 'arabic'
+  | 'belarusian'
+  | 'bengali'
+  | 'bulgarian'
+  | 'catalan'
+  | 'chinese'
+  | 'czech'
+  | 'danish'
+  | 'dutch'
+  | 'english'
+  | 'esperanto'
+  | 'estonian'
+  | 'finnish'
+  | 'french'
+  | 'galician'
+  | 'georgian'
+  | 'german'
+  | 'greek'
+  | 'gujarati'
+  | 'haitianCreole'
+  | 'hebrew'
+  | 'hindi'
+  | 'hungarian'
+  | 'icelandic'
+  | 'indonesian'
+  | 'irish'
+  | 'italian'
+  | 'japanese'
+  | 'kannada'
+  | 'korean'
+  | 'latvian'
+  | 'lithuanian'
+  | 'macedonian'
+  | 'malay'
+  | 'maltese'
+  | 'marathi'
+  | 'norwegian'
+  | 'persian'
+  | 'polish'
+  | 'portuguese'
+  | 'romanian'
+  | 'russian'
+  | 'slovak'
+  | 'slovenian'
+  | 'spanish'
+  | 'swahili'
+  | 'tagalog'
+  | 'tamil'
+  | 'telugu'
+  | 'thai'
+  | 'turkish'
+  | 'ukrainian'
+  | 'urdu'
+  | 'vietnamese'
+  | 'welsh';
+
+interface RecognizeOptions {
   language: 'latin' | 'chinese' | 'devanagari' | 'japanese' | 'korean';
+  mode: 'recognize';
 }
+
+interface TranslateOptions {
+  language: 'latin' | 'chinese' | 'devanagari' | 'japanese' | 'korean';
+  mode: 'translate';
+  from: Languages;
+  to: Languages;
+}
+
+export type TextRecognitionOptions = RecognizeOptions | TranslateOptions;
 
 export type TextData = {
   result: {
@@ -18,6 +88,7 @@ export type TextData = {
     text: string;
   };
 };
+
 type BlocksData = [
   cornerPoints: CornerPoints,
   frame: FrameType,

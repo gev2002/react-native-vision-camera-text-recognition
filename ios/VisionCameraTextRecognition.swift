@@ -7,6 +7,13 @@ import MLKitTextRecognitionDevanagari
 import MLKitTextRecognitionJapanese
 import MLKitTextRecognitionKorean
 import MLKitCommon
+import MLKitTranslate
+
+enum Mode {
+    case translate
+    case recognize
+}
+
 
 @objc(VisionCameraTextRecognition)
 public class VisionCameraTextRecognition: FrameProcessorPlugin {
@@ -17,6 +24,14 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
     private static let devanagariOptions = DevanagariTextRecognizerOptions()
     private static let japaneseOptions = JapaneseTextRecognizerOptions()
     private static let koreanOptions = KoreanTextRecognizerOptions()
+        private static var translatorOptions = TranslatorOptions(sourceLanguage: .english, targetLanguage: .german)
+        private let conditions = ModelDownloadConditions(
+            allowsCellularAccess: false,
+            allowsBackgroundDownloading: true
+        )
+        private var mode : Mode = .recognize
+        private let translator = Translator.translator(options: translatorOptions)
+        private var translatedText : String = ""
 
 
     public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
@@ -36,6 +51,20 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
         else {
             self.textRecognizer =  TextRecognizer.textRecognizer(options:VisionCameraTextRecognition.latinOptions)
         }
+        let modeFromTS = options["mode"] != nil ? options["mode"] as! String : ""
+                if modeFromTS == "translate"{
+                    let from = options["from"] != nil ? options["from"]  as! String : ""
+                    let to = options["to"] != nil ? options["to"]  as! String : ""
+                    mode = .translate
+                    if let sourceLanguage = TranslateLanguage(from: from),
+                       let targetLanguage = TranslateLanguage(from: to) {
+                           VisionCameraTextRecognition.translatorOptions = TranslatorOptions(sourceLanguage: sourceLanguage, targetLanguage: targetLanguage)
+                       } else {
+                           print("Invalid language strings provided for translation.")
+                       }
+                }else if modeFromTS == "recognize"{
+                    mode = .recognize
+                }
     }
 
     public override func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any {
@@ -52,15 +81,48 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
             return []
         }
 
+        if mode == .translate {
+            downloadModel { isDownloaded in
+                if isDownloaded {
+                    self.translatorFunction(text: result.text) { translatedText in
+                        self.translatedText = translatedText
+                    }
+                } else {
+                    print("Model not downloaded.")
+                }
+            }
+        }
 
-        return [
+        return mode == .translate ? [
             "result": [
-            "text": result.text,
-            "blocks": getBlockArray(result.blocks),
-    ]
-    ]
+                "text": self.translatedText,
+                "blocks": getBlockArray(result.blocks)
+            ]]
+        : [
+            "result": [
+                "text": result.text,
+                "blocks": getBlockArray(result.blocks)
+            ]]
     }
 
+    private func translatorFunction(text: String, completion: @escaping (String) -> Void) {
+        translator.translate(text) { translatedText, error in
+            guard error == nil, let translatedText = translatedText else {
+                completion("")
+                return
+            }
+            completion(translatedText)
+        }
+    }
+    private func downloadModel(completion: @escaping (Bool) -> Void) {
+        translator.downloadModelIfNeeded(with: conditions) { error in
+            guard error == nil else {
+                completion(false)
+                return
+            }
+            completion(true)
+        }
+    }
 
     private func getBlockArray(_ blocks: [TextBlock]) -> [[String: Any]] {
 

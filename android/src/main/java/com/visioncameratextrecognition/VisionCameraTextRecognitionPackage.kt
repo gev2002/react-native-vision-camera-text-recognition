@@ -7,18 +7,20 @@ import com.facebook.react.bridge.NativeModule
 import com.mrousavy.camera.frameprocessors.FrameProcessorPluginRegistry
 
 class VisionCameraTextRecognitionPackage : ReactPackage {
-   companion object {
-    init {
-      FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanText") {proxy,options ->
-        VisionCameraTextRecognitionModule(proxy,options)
-      }
+    companion object {
+        init {
+            FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanText") { proxy, options ->
+                VisionCameraTextRecognitionModule(proxy, options)
+            }
+        }
     }
-  }
-  override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-    return emptyList()
-  }
-  override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-    return emptyList()
-  }
+
+    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+        return emptyList()
+    }
+
+    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+        return listOf(RemoveLanguageModel(reactContext))
+    }
 }
 

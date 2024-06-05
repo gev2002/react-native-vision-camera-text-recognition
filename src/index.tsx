@@ -56,7 +56,12 @@ export function useTextRecognition(
   options?: TextRecognitionOptions
 ): TextRecognitionPlugin {
   return useMemo(
-    () => createTextRecognitionPlugin(options || { language: 'latin' }),
+    () =>
+      createTextRecognitionPlugin(
+        options || { language: 'latin', mode: 'recognize' }
+      ),
     [options]
   );
 }
+
+export { RemoveLanguageModel } from './RemoveLanguageModel';
