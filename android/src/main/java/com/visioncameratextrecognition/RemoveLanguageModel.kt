@@ -11,8 +11,8 @@ class RemoveLanguageModel(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
 
     @ReactMethod
-    fun remove(name: String, promise: Promise) {
-        val modelName = translateLanguage(name)?.let { TranslateRemoteModel.Builder(it).build() }
+    fun remove(code: String, promise: Promise) {
+        val modelName = translateLanguage(code)?.let { TranslateRemoteModel.Builder(it).build() }
         if (modelName != null) {
             modelManager.deleteDownloadedModel(modelName)
                 .addOnSuccessListener {

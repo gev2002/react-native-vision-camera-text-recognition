@@ -3,119 +3,119 @@ import MLKitTranslate
 
 func TranslateLanguage(from language: String) -> TranslateLanguage? {
     switch language.lowercased() {
-    case "afrikaans":
+    case "af":
         return .afrikaans
-    case "albanian":
+    case "sq":
         return .albanian
-    case "arabic":
+    case "ar":
         return .arabic
-    case "belarusian":
+    case "be":
         return .belarusian
-    case "bengali":
+    case "bg":
         return .bengali
-    case "bulgarian":
+    case "bn":
         return .bulgarian
-    case "catalan":
+    case "ca":
         return .catalan
-    case "chinese":
+    case "zh":
         return .chinese
-    case "czech":
+    case "cs":
         return .czech
-    case "danish":
+    case "da":
         return .danish
-    case "dutch":
+    case "nl":
         return .dutch
-    case "english":
+    case "en":
         return .english
-    case "eperanto":
+    case "eo":
         return .eperanto
-    case "estonian":
+    case "et":
         return .estonian
-    case "finnish":
+    case "fi":
         return .finnish
-    case "french":
+    case "fr":
         return .french
-    case "galician":
+    case "gl":
         return .galician
-    case "georgian":
+    case "ka":
         return .georgian
-    case "german":
+    case "de":
         return .german
-    case "greek":
+    case "el":
         return .greek
-    case "gujarati":
+    case "gu":
         return .gujarati
-    case "haitianCreole":
+    case "ht":
         return .haitianCreole
-    case "hebrew":
+    case "he":
         return .hebrew
-    case "hindi":
+    case "hi":
         return .hindi
-    case "hungarian":
+    case "hu":
         return .hungarian
-    case "icelandic":
+    case "is":
         return .icelandic
-    case "indonesian":
+    case "id":
         return .indonesian
-    case "irish":
+    case "ga":
         return .irish
-    case "italian":
+    case "it":
         return .italian
-    case "japanese":
+    case "ja":
         return .japanese
-    case "kannada":
+    case "kn":
         return .kannada
-    case "korean":
+    case "ko":
         return .korean
-    case "latvian":
+    case "lv":
         return .latvian
-    case "lithuanian":
+    case "lt":
         return .lithuanian
-    case "macedonian":
+    case "mk":
         return .macedonian
-    case "malay":
+    case "ms":
         return .malay
-    case "maltese":
+    case "mt":
         return .maltese
-    case "marathi":
+    case "mr":
         return .marathi
-    case "norwegian":
+    case "no":
         return .norwegian
-    case "persian":
+    case "fa":
         return .persian
-    case "polish":
+    case "pl":
         return .polish
-    case "portuguese":
+    case "pt":
         return .portuguese
-    case "romanian":
+    case "ro":
         return .romanian
-    case "russian":
+    case "ru":
         return .russian
-    case "slovak":
+    case "sk":
         return .slovak
-    case "slovenian":
+    case "sl":
         return .slovenian
-    case "spanish":
+    case "es":
         return .spanish
-    case "swahili":
+    case "sw":
         return .swahili
-    case "tagalog":
+    case "tl":
         return .tagalog
-    case "tamil":
+    case "ta":
         return .tamil
-    case "telugu":
+    case "te":
         return .telugu
-    case "thai":
+    case "th":
         return .thai
-    case "turkish":
+    case "tr":
         return .turkish
-    case "ukrainian":
+    case "uk":
         return .ukrainian
-    case "urdu":
+    case "ur":
         return .urdu
-    case "vietnamese":
+    case "vi":
         return .vietnamese
-    case "welsh":
+    case "cy":
         return .welsh
     default:
         return nil

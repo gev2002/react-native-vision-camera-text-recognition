@@ -1,9 +1,10 @@
 package com.visioncameratextrecognition
 
-import android.annotation.SuppressLint
 import android.graphics.Point
 import android.graphics.Rect
 import android.media.Image
+import android.util.SparseIntArray
+import android.view.Surface
 import com.facebook.react.bridge.WritableNativeArray
 import com.facebook.react.bridge.WritableNativeMap
 import com.google.android.gms.tasks.Task
@@ -11,45 +12,33 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.common.model.DownloadConditions
-import com.google.mlkit.nl.translate.*
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
 import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.mrousavy.camera.core.types.Orientation
 import com.mrousavy.camera.frameprocessors.Frame
 import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin
 import com.mrousavy.camera.frameprocessors.VisionCameraProxy
 import java.util.HashMap
 
+class VisionCameraTextRecognitionModule(proxy: VisionCameraProxy, options: Map<String, Any>?) : FrameProcessorPlugin() {
 
-enum class Mode {
-    translate,
-    recognize
-}
-
-
-class VisionCameraTextRecognitionModule(proxy: VisionCameraProxy, options: Map<String, Any>?) :
-    FrameProcessorPlugin() {
-
-    private val conditions = DownloadConditions.Builder().requireWifi().build()
-    private var translatorOptions = TranslatorOptions.Builder()
-        .setSourceLanguage(TranslateLanguage.ENGLISH)
-        .setTargetLanguage(TranslateLanguage.GERMAN)
-        .build()
-    private val translator = Translation.getClient(translatorOptions)
-    private var mode: Mode = Mode.recognize
-    private var translatedText: String = ""
     private var recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val latinOptions = TextRecognizerOptions.DEFAULT_OPTIONS
     private val chineseOptions = ChineseTextRecognizerOptions.Builder().build()
     private val devanagariOptions = DevanagariTextRecognizerOptions.Builder().build()
     private val japaneseOptions = JapaneseTextRecognizerOptions.Builder().build()
     private val koreanOptions = KoreanTextRecognizerOptions.Builder().build()
-
+    private val ORIENTATIONS = SparseIntArray()
 
     init {
+        ORIENTATIONS.append(Surface.ROTATION_0, 0)
+        ORIENTATIONS.append(Surface.ROTATION_90, 90)
+        ORIENTATIONS.append(Surface.ROTATION_180, 180)
+        ORIENTATIONS.append(Surface.ROTATION_270, 270)
+
         val language = options?.get("language")
         recognizer = when (language) {
             "latin" -> TextRecognition.getClient(latinOptions)
@@ -59,88 +48,89 @@ class VisionCameraTextRecognitionModule(proxy: VisionCameraProxy, options: Map<S
             "korean" -> TextRecognition.getClient(koreanOptions)
             else -> TextRecognition.getClient(latinOptions)
         }
-        val modeFromTS = options?.get("mode") as? String ?: ""
-        if (modeFromTS == "translate") {
-            this.mode = Mode.translate
-            val from = options?.get("from") as? String ?: ""
-            val to = options?.get("to") as? String ?: ""
-
-            val sourceLanguage = translateLanguage(from)
-            val targetLanguage = translateLanguage(to)
-
-            if (sourceLanguage != null && targetLanguage != null) {
-                translatorOptions = TranslatorOptions.Builder()
-                    .setSourceLanguage(sourceLanguage)
-                    .setTargetLanguage(targetLanguage)
-                    .build()
-            } else {
-                println("Invalid language strings provided for translation.")
-            }
-        } else if (modeFromTS == "recognize") {
-            this.mode = Mode.recognize
-        }
-
     }
 
-    private fun downloadModel(completion: (Boolean) -> Unit) {
-        translator.downloadModelIfNeeded(conditions)
-            .addOnSuccessListener {
-                completion(true)
-            }
-            .addOnFailureListener {
-                completion(false)
-            }
-    }
-
-    private fun translatorFunction(text: String, completion: (String) -> Unit) {
-        translator.translate(text)
-            .addOnSuccessListener { translatedText ->
-                completion(translatedText)
-            }
-            .addOnFailureListener {
-                completion("")
-            }
-    }
-
-    @SuppressLint("SuspiciousIndentation")
     override fun callback(frame: Frame, arguments: Map<String, Any>?): HashMap<String, Any>? {
-
-        val result = WritableNativeMap()
-        val mediaImage: Image = frame.image
-        val image =
-            InputImage.fromMediaImage(mediaImage, frame.imageProxy.imageInfo.rotationDegrees)
-        val task: Task<Text> = recognizer.process(image)
-        try {
-            val text: Text = Tasks.await<Text>(task)
-            if (mode == Mode.translate) {
-                downloadModel { isDownloaded ->
-                    if (isDownloaded) {
-                        translatorFunction(text = text.text) { translatedText ->
-                            this.translatedText = translatedText
+        val data = WritableNativeMap()
+        val mediaImage: Image? = frame.image
+        if (mediaImage != null) {
+            val rotation = getFrameRotation(frame.orientation)
+            val image = InputImage.fromMediaImage(mediaImage, rotation)
+            val task: Task<Text> = recognizer.process(image)
+            try {
+                val text: Text = Tasks.await(task)
+                val blockArray = WritableNativeArray()
+                for (block in text.textBlocks) {
+                    val blockMap = WritableNativeMap()
+                    data.putString("resultText", text.text)
+                    val blockText = block.text
+                    blockMap.putString("blockText", blockText)
+                    val blockCornerPoints = block.cornerPoints?.let { getCornerPoints(it) }
+                    blockMap.putArray("blockCornerPoints", blockCornerPoints)
+                    val blockFrame = getFrame(block.boundingBox)
+                    blockMap.putMap("blockFrame", blockFrame)
+                    val blockLanguages = WritableNativeArray()
+                    blockLanguages.pushString(block.recognizedLanguage)
+                    blockMap.putArray("blockLanguages", blockLanguages)
+                    for (line in block.lines) {
+                        val lineArr = WritableNativeArray()
+                        val lineMap = WritableNativeMap()
+                        val lineText = line.text
+                        lineMap.putString("lineText", lineText)
+                        val lineCornerPoints = line.cornerPoints?.let { getCornerPoints(it) }
+                        lineMap.putArray("lineCornerPoints", lineCornerPoints)
+                        val lineFrame = getFrame(line.boundingBox)
+                        lineMap.putMap("lineFrame", lineFrame)
+                        val lineLanguages = WritableNativeArray()
+                        lineLanguages.pushString(line.recognizedLanguage)
+                        lineMap.putArray("lineLanguages", lineLanguages)
+                        for (element in line.elements) {
+                            val elementArr = WritableNativeArray()
+                            val elementMap = WritableNativeMap()
+                            val elementText = element.text
+                            elementMap.putString("elementText", elementText)
+                            val elementCornerPoints = element.cornerPoints?.let { getCornerPoints(it) }
+                            elementMap.putArray("elementCornerPoints", elementCornerPoints)
+                            val elementFrame = getFrame(element.boundingBox)
+                            elementMap.putMap("elementFrame", elementFrame)
+                            elementArr.pushMap(elementMap)
+                            lineMap.putArray("elements", elementArr)
                         }
-                    } else {
-                        println("Model not downloaded.")
+                        lineArr.pushMap(lineMap)
+                        blockMap.putArray("lines", lineArr)
                     }
+                    blockArray.pushMap(blockMap)
                 }
+                data.putArray("blocks", blockArray)
+                mediaImage.close()
+                return if (text.text.isEmpty()){
+                 WritableNativeMap().toHashMap()
+                }else {
+                data.toHashMap()
+                }
+            } catch (e: Exception) {
+                mediaImage.close()
+                e.printStackTrace()
+                return null
             }
-
-            if (this.mode == Mode.translate) {
-                result.putString("text", this.translatedText)
-            } else {
-                result.putString("text", text.text)
-            }
-            result.putArray("blocks", getBlockArray(text.textBlocks))
-        } catch (e: Exception) {
+        } else {
             return null
         }
-        val data = WritableNativeMap()
-        data.putMap("result", result)
-        return data.toHashMap()
+    }
+
+    private fun getCornerPoints(points: Array<Point>): WritableNativeArray {
+        val cornerPoints = WritableNativeArray()
+        for (point in points) {
+            val pointMap = WritableNativeMap()
+            pointMap.putInt("x", point.x)
+            pointMap.putInt("y", point.y)
+            cornerPoints.pushMap(pointMap)
+        }
+        return cornerPoints
     }
 
     private fun getFrame(boundingBox: Rect?): WritableNativeMap {
         val frame = WritableNativeMap()
-
         if (boundingBox != null) {
             frame.putDouble("x", boundingBox.exactCenterX().toDouble())
             frame.putDouble("y", boundingBox.exactCenterY().toDouble())
@@ -152,77 +142,12 @@ class VisionCameraTextRecognitionModule(proxy: VisionCameraProxy, options: Map<S
         return frame
     }
 
-    private fun getRecognizedLanguages(recognizedLanguage: String): WritableNativeArray {
-        val recognizedLanguages = WritableNativeArray()
-        recognizedLanguages.pushString(recognizedLanguage)
-        return recognizedLanguages
-    }
-
-    private fun getCornerPoints(points: Array<Point>): WritableNativeArray {
-        val cornerPoints = WritableNativeArray()
-
-        for (point in points) {
-            val pointMap = WritableNativeMap()
-            pointMap.putInt("x", point.x)
-            pointMap.putInt("y", point.y)
-            cornerPoints.pushMap(pointMap)
+    private fun getFrameRotation(orientation: Orientation): Int {
+        return when (orientation) {
+            Orientation.PORTRAIT -> 0
+            Orientation.LANDSCAPE_LEFT -> 90
+            Orientation.PORTRAIT_UPSIDE_DOWN -> 180
+            Orientation.LANDSCAPE_RIGHT -> 270
         }
-        return cornerPoints
     }
-
-    private fun getLineArray(lines: MutableList<Text.Line>): WritableNativeArray {
-        val lineArray = WritableNativeArray()
-
-        for (line in lines) {
-            val lineMap = WritableNativeMap()
-
-            lineMap.putString("text", line.text)
-            lineMap.putArray("recognizedLanguages", getRecognizedLanguages(line.recognizedLanguage))
-            lineMap.putArray("cornerPoints", line.cornerPoints?.let { getCornerPoints(it) })
-            lineMap.putMap("frame", getFrame(line.boundingBox))
-            lineMap.putArray("elements", getElementArray(line.elements))
-
-            lineArray.pushMap(lineMap)
-        }
-        return lineArray
-    }
-
-    private fun getElementArray(elements: MutableList<Text.Element>): WritableNativeArray {
-        val elementArray = WritableNativeArray()
-
-        for (element in elements) {
-            val elementMap = WritableNativeMap()
-
-            elementMap.putString("text", element.text)
-            elementMap.putArray("cornerPoints", element.cornerPoints?.let { getCornerPoints(it) })
-            elementMap.putMap("frame", getFrame(element.boundingBox))
-        }
-        return elementArray
-    }
-
-    private fun getBlockArray(blocks: MutableList<Text.TextBlock>): WritableNativeArray {
-        val blockArray = WritableNativeArray()
-
-        for (block in blocks) {
-            val blockMap = WritableNativeMap()
-
-            blockMap.putString("text", block.text)
-            blockMap.putArray(
-                "recognizedLanguages",
-                getRecognizedLanguages(block.recognizedLanguage)
-            )
-            blockMap.putArray("cornerPoints", block.cornerPoints?.let { getCornerPoints(it) })
-            blockMap.putMap("frame", getFrame(block.boundingBox))
-            blockMap.putArray("lines", getLineArray(block.lines))
-
-            blockArray.pushMap(blockMap)
-        }
-        return blockArray
-    }
-
-
 }
-
-
-
-

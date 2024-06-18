@@ -9,94 +9,101 @@ export type {
 export type { ForwardedRef } from 'react';
 import type { CameraProps, Frame } from 'react-native-vision-camera';
 
-type Languages =
-  | 'afrikaans'
-  | 'albanian'
-  | 'arabic'
-  | 'belarusian'
-  | 'bengali'
-  | 'bulgarian'
-  | 'catalan'
-  | 'chinese'
-  | 'czech'
-  | 'danish'
-  | 'dutch'
-  | 'english'
-  | 'esperanto'
-  | 'estonian'
-  | 'finnish'
-  | 'french'
-  | 'galician'
-  | 'georgian'
-  | 'german'
-  | 'greek'
-  | 'gujarati'
-  | 'haitianCreole'
-  | 'hebrew'
-  | 'hindi'
-  | 'hungarian'
-  | 'icelandic'
-  | 'indonesian'
-  | 'irish'
-  | 'italian'
-  | 'japanese'
-  | 'kannada'
-  | 'korean'
-  | 'latvian'
-  | 'lithuanian'
-  | 'macedonian'
-  | 'malay'
-  | 'maltese'
-  | 'marathi'
-  | 'norwegian'
-  | 'persian'
-  | 'polish'
-  | 'portuguese'
-  | 'romanian'
-  | 'russian'
-  | 'slovak'
-  | 'slovenian'
-  | 'spanish'
-  | 'swahili'
-  | 'tagalog'
-  | 'tamil'
-  | 'telugu'
-  | 'thai'
-  | 'turkish'
-  | 'ukrainian'
-  | 'urdu'
-  | 'vietnamese'
-  | 'welsh';
+export type Languages =
+  | 'af'
+  | 'sq'
+  | 'ar'
+  | 'be'
+  | 'bn'
+  | 'bg'
+  | 'ca'
+  | 'zh'
+  | 'cs'
+  | 'da'
+  | 'nl'
+  | 'en'
+  | 'eo'
+  | 'et'
+  | 'fi'
+  | 'fr'
+  | 'gl'
+  | 'ka'
+  | 'de'
+  | 'el'
+  | 'gu'
+  | 'ht'
+  | 'he'
+  | 'hi'
+  | 'hu'
+  | 'is'
+  | 'id'
+  | 'ga'
+  | 'it'
+  | 'ja'
+  | 'kn'
+  | 'ko'
+  | 'lv'
+  | 'lt'
+  | 'mk'
+  | 'ms'
+  | 'mt'
+  | 'mr'
+  | 'no'
+  | 'fa'
+  | 'pl'
+  | 'pt'
+  | 'ro'
+  | 'ru'
+  | 'sk'
+  | 'sl'
+  | 'es'
+  | 'sw'
+  | 'tl'
+  | 'ta'
+  | 'te'
+  | 'th'
+  | 'tr'
+  | 'uk'
+  | 'ur'
+  | 'vi'
+  | 'cy';
 
-interface RecognizeOptions {
+export type TextRecognitionOptions = {
   language: 'latin' | 'chinese' | 'devanagari' | 'japanese' | 'korean';
-  mode: 'recognize';
-}
+};
 
-interface TranslateOptions {
-  language: 'latin' | 'chinese' | 'devanagari' | 'japanese' | 'korean';
-  mode: 'translate';
+export type TranslatorOptions = {
   from: Languages;
   to: Languages;
-}
+};
 
-export type TextRecognitionOptions = RecognizeOptions | TranslateOptions;
+export type CameraTypes = {
+  callback: (data: string | Text) => void;
+  options: TextRecognitionOptions | TranslatorOptions;
+  mode: 'translate' | 'recognize';
+} & CameraProps;
 
-export type TextData = {
-  result: {
-    blocks: [] | BlocksData;
-    text: string;
-  };
+export type TextRecognitionPlugin = {
+  scanText: (frame: Frame) => Text;
+};
+export type TranslatorPlugin = {
+  translate: (frame: Frame) => string;
+};
+
+export type Text = {
+  blocks: BlocksData;
+  resultText: string;
 };
 
 type BlocksData = [
-  cornerPoints: CornerPoints,
-  frame: FrameType,
-  lines: LinesType,
-  recognizedLanguages: string[] | [],
+  blockFrame: FrameType,
+  blockCornerPoints: CornerPointsType,
+  lines: LinesData,
+  blockLanguages: string[] | [],
+  blockText: string,
 ];
 
-type CornerPoints = [{ x: number; y: number }];
+type CornerPointsType = [{ x: number; y: number }];
 
 type FrameType = {
   boundingCenterX: number;
@@ -107,28 +114,16 @@ type FrameType = {
   y: number;
 };
 
-type LinesType = [
-  cornerPoints: CornerPoints,
-  elements: ElementsType,
-  frame: FrameType,
-  recognizedLanguages: string[],
-  text: string,
+type LinesData = [
+  lineCornerPoints: CornerPointsType,
+  elements: ElementsData,
+  lineFrame: FrameType,
+  lineLanguages: string[] | [],
+  lineText: string,
 ];
 
-type ElementsType = [
-  cornerPoints: CornerPoints,
-  frame: FrameType,
-  text: string,
+type ElementsData = [
+  elementCornerPoints: CornerPointsType,
+  elementFrame: FrameType,
+  elementText: string,
 ];
-export interface Text {
-  [key: number | string]: TextData;
-}
-
-export type CameraTypes = {
-  callback: (data: Text) => void;
-  options: TextRecognitionOptions;
-} & CameraProps;
-
-export type TextRecognitionPlugin = {
-  scanText: (frame: Frame) => Text;
-};

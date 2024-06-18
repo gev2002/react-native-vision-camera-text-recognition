@@ -22,12 +22,30 @@
 }
 @end
 
+
+
+@interface VisionCameraTranslator (FrameProcessorPluginLoader)
+@end
+
+@implementation VisionCameraTranslator (FrameProcessorPluginLoader)
++ (void) load {
+  [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"translate"
+    withInitializer:^FrameProcessorPlugin*(VisionCameraProxyHolder* proxy, NSDictionary* options) {
+    return [[VisionCameraTranslator alloc] initWithProxy:proxy withOptions:options];
+  }];
+}
+@end
+
+
+
+
+
 #import <React/RCTBridgeModule.h>
 #import <React/RCTViewManager.h>
 
 @interface RCT_EXTERN_MODULE(RemoveLanguageModel, NSObject)
 
-RCT_EXTERN_METHOD(remove:(NSString *)name
+RCT_EXTERN_METHOD(remove:(NSString *)code
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 

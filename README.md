@@ -2,7 +2,7 @@
 
 A plugin to Scanning Text,Translate using ML Kit Text Recognition and ML Kit Translation. With High Performance and many features.
 # 🚨 Required Modules
-react-native-vision-camera = 4.0.5 <br/>
+react-native-vision-camera = 4.3.2 <br/>
 react-native-worklets-core = 1.3.3
 
 ## 💻 Installation
@@ -22,7 +22,7 @@ yarn add react-native-vision-camera-text-recognition
     Can translate text. 🌍
 
 ## 💡 Usage
-
+### 📚 For Recognize Text 
 ```js
 import React, { useState } from 'react'
 import { useCameraDevice } from 'react-native-vision-camera'
@@ -40,11 +40,44 @@ function App (){
           device={device}
           isActive
           options={{
-            language: 'latin',
-            mode: 'translate',
-            from: 'english',
-            to: 'german'
+            language: 'latin'
           }}
+          mode={'recognize'}
+          callback={(d) => setData(d)}
+        />
+      )}
+    </>
+  )
+}
+
+export default App;
+
+
+
+```
+
+### 🌍 For Translate Text
+```js
+import React, { useState } from 'react'
+import { useCameraDevice } from 'react-native-vision-camera'
+import { Camera } from 'react-native-vision-camera-text-recognition';
+
+function App (){
+  const [data,setData] = useState(null)
+  const device = useCameraDevice('back');
+  console.log(data)
+  return(
+    <>
+      {!!device && (
+        <Camera
+          style={StyleSheet.absoluteFill}
+          device={device}
+          isActive
+          options={{
+            from: 'en',
+            to: 'de'
+          }}
+          mode={'translate'}
           callback={(d) => setData(d)}
         />
       )}
@@ -55,6 +88,7 @@ function App (){
 export default App;
 
 ```
+
 ### Also You Can Use Like This
 
 ```js
@@ -69,7 +103,7 @@ import { useTextRecognition } from "react-native-vision-camera-text-recognition"
 
 function App() {
   const device = useCameraDevice('back');
-  const options = { language : 'latin', mode: 'recognize' }
+  const options = { language : 'latin' }
   const {scanText} = useTextRecognition(options)
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet'
@@ -83,6 +117,7 @@ function App() {
           style={StyleSheet.absoluteFill}
           device={device}
           isActive
+          mode={'recognize'}
           frameProcessor={frameProcessor}
         />
       )}
@@ -90,78 +125,88 @@ function App() {
   );
 }
 export default App;
+
+
 ```
-
-
 ---
 ## ⚙️ Options
 
-|   Name   |  Type    |                    Values                    |    Default     |
-|:--------:| :---: |:--------------------------------------------:|:--------------:|
-| language | string | latin, chinese, devanagari, japanese, korean |     latin      |
-|   mode   | string |             recognize, translate             |   recognize    |
-| from,to  | string |                  See Below                   | english,german |
+|   Name   |  Type    |                    Values                    |  Default  |
+|:--------:| :---: |:--------------------------------------------:|:---------:|
+| language | string | latin, chinese, devanagari, japanese, korean |   latin   |
+|   mode   | string |             recognize, translate             | recognize |
+| from,to  | string |                  See Below                   |   en,de   |
 
 
+
+
+### You can also remove unnecessary translation model
+
+```js
+import { RemoveLanguageModel } from "react-native-vision-camera-text-recognition";
+
+const bool = await RemoveLanguageModel("en")
+```
 
 ```#Supported Languages
 ```
-<h3>Afrikaans: 🇿🇦, 🇨🇫</h3>
-<h3>Albanian: 🇦🇱</h3>
-<h3>Arabic: 🇦🇪, 🇸🇦</h3>
-<h3>Belarusian: 🇧🇾</h3>
-<h3>Bulgarian: 🇧🇬</h3>
-<h3>Bengali: 🇧🇩, 🇮🇳</h3>
-<h3>Catalan: 🇪🇸, 🇦🇩</h3>
-<h3>Czech: 🇨🇿</h3>
-<h3>Welsh: 🏴</h3>
-<h3>Danish: 🇩🇰</h3>
-<h3>German: 🇩🇪</h3>
-<h3>Greek: 🇬🇷</h3>
-<h3>English: 🇬🇧, 🇺🇸</h3>
-<h3>Esperanto: 🌍</h3>
-<h3>Spanish: 🇪🇸</h3>
-<h3>Estonian: 🇪🇪</h3>
-<h3>Persian: 🇮🇷, 🇦🇫</h3>
-<h3>Finnish: 🇫🇮</h3>
-<h3>French: 🇫🇷</h3>
-<h3>Irish: 🇮🇪</h3>
-<h3>Galician: 🇪🇸</h3>
-<h3>Gujarati: 🇮🇳</h3>
-<h3>Hebrew: 🇮🇱</h3>
-<h3>Hindi: 🇮🇳</h3>
-<h3>Croatian: 🇭🇷</h3>
-<h3>Haitian: 🇭🇹</h3>
-<h3>Hungarian: 🇭🇺</h3>
-<h3>Indonesian: 🇮🇩</h3>
-<h3>Icelandic: 🇮🇸</h3>
-<h3>Italian: 🇮🇹</h3>
-<h3>Japanese: 🇯🇵</h3>
-<h3>Georgian: 🇬🇪</h3>
-<h3>Canada: 🇨🇦</h3>
-<h3>Korean: 🇰🇷, 🇰🇵</h3>
-<h3>Lithuanian: 🇱🇹</h3>
-<h3>Latvian: 🇱🇻</h3>
-<h3>Macedonian: 🇲🇰</h3>
-<h3>Marathi: 🇮🇳</h3>
-<h3>Malay: 🇲🇾, 🇸🇬</h3>
-<h3>Maltese: 🇲🇹</h3>
-<h3>Dutch: 🇳🇱, 🇧🇪</h3>
-<h3>Norwegian: 🇳🇴</h3>
-<h3>Polish: 🇵🇱</h3>
-<h3>Portuguese: 🇵🇹</h3>
-<h3>Romanian: 🇷🇴</h3>
-<h3>Russian: 🇷🇺</h3>
-<h3>Slovak: 🇸🇰</h3>
-<h3>Slovenian: 🇸🇮</h3>
-<h3>Swedish: 🇸🇪, 🇫🇮</h3>
-<h3>Swahili: 🇰🇪, 🇹🇿</h3>
-<h3>Tamil: 🇮🇳, 🇱🇰</h3>
-<h3>Telugu: 🇮🇳</h3>
-<h3>Thai: 🇹🇭</h3>
-<h3>Tagalog: 🇵🇭</h3>
-<h3>Turkish: 🇹🇷</h3>
-<h3>Ukrainian: 🇺🇦</h3>
-<h3>Urdu: 🇵🇰, 🇮🇳</h3>
-<h3>Vietnamese: 🇻🇳</h3>
-<h3>Chinese: 🇨🇳</h3>
+
+<h3>Afrikaans: 🇿🇦, 🇨🇫 <---> code : "af"</h3>
+<h3>Albanian: 🇦🇱 <---> code : "sq"</h3>
+<h3>Arabic: 🇦🇪, 🇸🇦 <---> code : "ar"</h3>
+<h3>Belarusian: 🇧🇾 <---> code : "be"</h3>
+<h3>Bulgarian: 🇧🇬 <---> code : "bn"</h3>
+<h3>Bengali: 🇧🇩 <---> code : "bg"</h3>
+<h3>Catalan: 🏴 <---> code : "ca"</h3>
+<h3>Czech: 🇨🇿 <---> code : "cs"</h3>
+<h3>Welsh: 🏴󠁧󠁢󠁷󠁬󠁳󠁿 <---> code : "cy"</h3>
+<h3>Danish: 🇩🇰 <---> code : "da"</h3>
+<h3>German: 🇩🇪 <---> code : "de"</h3>
+<h3>Greek: 🇬🇷 <---> code : "el"</h3>
+<h3>English: 🇬🇧, 🇺🇸 <---> code : "en"</h3>
+<h3>Esperanto: 🌍 <---> code : "eo"</h3>
+<h3>Spanish: 🇪🇸 <---> code : "es"</h3>
+<h3>Estonian: 🇪🇪 <---> code : "et"</h3>
+<h3>Persian: 🇮🇷 <---> code : "fa"</h3>
+<h3>Finnish: 🇫🇮 <---> code : "fi"</h3>
+<h3>French: 🇫🇷 <---> code : "fr"</h3>
+<h3>Irish: 🇮🇪 <---> code : "ga"</h3>
+<h3>Galician: 🏴 <---> code : "gl"</h3>
+<h3>Gujarati: 🏴 <---> code : "gu"</h3>
+<h3>Hebrew: 🇮🇱 <---> code : "he"</h3>
+<h3>Hindi: 🇮🇳 <---> code : "hi"</h3>
+<h3>Croatian: 🇭🇷 <---> code : "hr"</h3>
+<h3>Haitian: 🇭🇹 <---> code : "ht"</h3>
+<h3>Hungarian: 🇭🇺 <---> code : "hu"</h3>
+<h3>Indonesian: 🇮🇩 <---> code : "id"</h3>
+<h3>Icelandic: 🇮🇸 <---> code : "is"</h3>
+<h3>Italian: 🇮🇹 <---> code : "it"</h3>
+<h3>Japanese: 🇯🇵 <---> code : "ja"</h3>
+<h3>Georgian: 🇬🇪 <---> code : "ka"</h3>
+<h3>Kannada: 🇨🇦 <---> code : "kn"</h3>
+<h3>Korean: 🇰🇷, 🇰🇵 <---> code : "ko"</h3>
+<h3>Lithuanian: 🇱🇹 <---> code : "lt"</h3>
+<h3>Latvian: 🇱🇻 <---> code : "lv"</h3>
+<h3>Macedonian: 🇲🇰 <---> code : "mk"</h3>
+<h3>Marathi: 🇮🇳 <---> code : "mr"</h3>
+<h3>Malay: 🇲🇾 <---> code : "ms"</h3>
+<h3>Maltese: 🇲🇹 <---> code : "mt"</h3>
+<h3>Dutch: 🇳🇱 <---> code : "nl"</h3>
+<h3>Norwegian: 🇳🇴 <---> code : "no"</h3>
+<h3>Polish: 🇵🇱 <---> code : "pl"</h3>
+<h3>Portuguese: 🇵🇹 <---> code : "pt"</h3>
+<h3>Romanian: 🇷🇴 <---> code : "ro"</h3>
+<h3>Russian: 🇷🇺 <---> code : "ru"</h3>
+<h3>Slovak: 🇸🇰 <---> code : "sk"</h3>
+<h3>Slovenian: 🇸🇮 <---> code : "sl"</h3>
+<h3>Swedish: 🇸🇪 <---> code : "sv"</h3>
+<h3>Swahili: 🇰🇪 <---> code : "sw"</h3>
+<h3>Tamil: 🇱🇰 <---> code : "ta"</h3>
+<h3>Telugu: 🇮🇳 <---> code : "te"</h3>
+<h3>Thai: 🇹🇭 <---> code : "th"</h3>
+<h3>Tagalog: 🇵🇭 <---> code : "tl"</h3>
+<h3>Turkish: 🇹🇷 <---> code : "tr"</h3>
+<h3>Ukrainian: 🇺🇦 <---> code : "uk"</h3>
+<h3>Urdu: 🇵🇰 <---> code : "ur"</h3>
+<h3>Vietnamese: 🇻🇳 <---> code : "vi"</h3>
+<h3>Chinese: 🇨🇳 <---> code : "zh"</h3>

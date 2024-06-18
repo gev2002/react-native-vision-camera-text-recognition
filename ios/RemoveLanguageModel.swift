@@ -6,8 +6,8 @@ import MLKitTranslate
 class RemoveLanguageModel: NSObject {
 
   @objc(remove:withResolver:withRejecter:)
-  private func remove(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      guard let modelName = TranslateLanguage(from: name) else {
+  private func remove(code: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      guard let modelName = TranslateLanguage(from: code) else {
           resolve(false)
           return
       }
