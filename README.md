@@ -19,10 +19,11 @@ yarn add react-native-vision-camera-text-recognition
     Works Fast.
     Works With Android 🤖 and IOS.📱
     Writen With Kotlin and Swift.
+    Can Recognize Text From Photo. 📸
     Can translate text. 🌍
 
 ## 💡 Usage
-### 📚 For Recognize Text 
+### 📚 For Live Recognition Text
 ```js
 import React, { useState } from 'react'
 import { useCameraDevice } from 'react-native-vision-camera'
@@ -138,19 +139,38 @@ export default App;
 | from,to  | string |                  See Below                   |   en,de   |
 
 
+##  Recognize By Photo 📸
+
+```js
+import { PhotoRecognizer } from "react-native-vision-camera-text-recognition";
+
+const result = await PhotoRecognizer({
+    uri:assets.uri,
+    width:assets.width,
+    height:assets.height
+})
+console.log(result);
+
+```
+|  Name   |  Type  | Required |
+|:-------:|:------:|:--------:|
+|   uri   | string |   yes    |
+|  width  | number |   yes    |
+| height | number |   yes    |
 
 
 ### You can also remove unnecessary translation model
+
+
 
 ```js
 import { RemoveLanguageModel } from "react-native-vision-camera-text-recognition";
 
 const bool = await RemoveLanguageModel("en")
 ```
+<h2>Supported Languages.</h2>
 
-```#Supported Languages
 ```
-
 <h3>Afrikaans: 🇿🇦, 🇨🇫 <---> code : "af"</h3>
 <h3>Albanian: 🇦🇱 <---> code : "sq"</h3>
 <h3>Arabic: 🇦🇪, 🇸🇦 <---> code : "ar"</h3>

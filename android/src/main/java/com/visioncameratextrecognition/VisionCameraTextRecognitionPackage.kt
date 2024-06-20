@@ -23,7 +23,10 @@ class VisionCameraTextRecognitionPackage : ReactPackage {
     }
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(RemoveLanguageModel(reactContext))
+            return listOf(
+                 RemoveLanguageModel(reactContext),
+                 PhotoRecognizerModule(reactContext)
+             )
     }
 }
 

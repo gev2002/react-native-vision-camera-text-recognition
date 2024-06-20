@@ -45,7 +45,7 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
 
         do {
             let result = try self.textRecognizer.results(in: image)
-            let blocks = processBlocks(blocks: result.blocks)
+            let blocks = VisionCameraTextRecognition.processBlocks(blocks: result.blocks)
             data["resultText"] = result.text
             data["blocks"] = blocks
             if result.text.isEmpty {
@@ -59,12 +59,11 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
         }
     }
 
-    private func processBlocks(blocks:[TextBlock]) -> Array<Any> {
+      static func processBlocks(blocks:[TextBlock]) -> Array<Any> {
         var blocksArray : [Any] = []
         for block in blocks {
             var blockData : [String:Any] = [:]
             blockData["blockText"] = block.text
-            blockData["blockLanguages"] = processRecognizedLanguages(block.recognizedLanguages)
             blockData["blockCornerPoints"] = processCornerPoints(block.cornerPoints)
             blockData["blockFrame"] = processFrame(block.frame)
             blockData["lines"] = processLines(lines: block.lines)
@@ -73,7 +72,7 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
         return blocksArray
     }
 
-    private func processLines(lines:[TextLine]) -> Array<Any> {
+    private static func processLines(lines:[TextLine]) -> Array<Any> {
         var linesArray : [Any] = []
         for line in lines {
             var lineData : [String:Any] = [:]
@@ -87,7 +86,7 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
         return linesArray
     }
 
-    private func processElements(elements:[TextElement]) -> Array<Any> {
+    private static func processElements(elements:[TextElement]) -> Array<Any> {
         var elementsArray : [Any] = []
 
         for element in elements {
@@ -102,7 +101,7 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
         return elementsArray
     }
 
-    private func processRecognizedLanguages(_ languages: [TextRecognizedLanguage]) -> [String] {
+    private static func processRecognizedLanguages(_ languages: [TextRecognizedLanguage]) -> [String] {
 
             var languageArray: [String] = []
 
@@ -111,17 +110,22 @@ public class VisionCameraTextRecognition: FrameProcessorPlugin {
                     print("No language code exists")
                     break;
                 }
-                languageArray.append(code)
+                if code.isEmpty{
+                    languageArray.append("und")
+                }else {
+                    languageArray.append(code)
+
+                }
             }
 
             return languageArray
         }
 
-    private func processCornerPoints(_ cornerPoints: [NSValue]) -> [[String: CGFloat]] {
+    private static func processCornerPoints(_ cornerPoints: [NSValue]) -> [[String: CGFloat]] {
         return cornerPoints.compactMap { $0.cgPointValue }.map { ["x": $0.x, "y": $0.y] }
     }
 
-    private func processFrame(_ frameRect: CGRect) -> [String: CGFloat] {
+    private static func processFrame(_ frameRect: CGRect) -> [String: CGFloat] {
         let offsetX = (frameRect.midX - ceil(frameRect.width)) / 2.0
         let offsetY = (frameRect.midY - ceil(frameRect.height)) / 2.0
 

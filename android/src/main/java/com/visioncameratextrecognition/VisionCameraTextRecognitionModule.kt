@@ -53,93 +53,26 @@ class VisionCameraTextRecognitionModule(proxy: VisionCameraProxy, options: Map<S
     override fun callback(frame: Frame, arguments: Map<String, Any>?): HashMap<String, Any>? {
         val data = WritableNativeMap()
         val mediaImage: Image? = frame.image
-        if (mediaImage != null) {
+        mediaImage?.let {
             val rotation = getFrameRotation(frame.orientation)
-            val image = InputImage.fromMediaImage(mediaImage, rotation)
+            val image = InputImage.fromMediaImage(it, rotation)
             val task: Task<Text> = recognizer.process(image)
             try {
                 val text: Text = Tasks.await(task)
-                val blockArray = WritableNativeArray()
-                for (block in text.textBlocks) {
-                    val blockMap = WritableNativeMap()
-                    data.putString("resultText", text.text)
-                    val blockText = block.text
-                    blockMap.putString("blockText", blockText)
-                    val blockCornerPoints = block.cornerPoints?.let { getCornerPoints(it) }
-                    blockMap.putArray("blockCornerPoints", blockCornerPoints)
-                    val blockFrame = getFrame(block.boundingBox)
-                    blockMap.putMap("blockFrame", blockFrame)
-                    val blockLanguages = WritableNativeArray()
-                    blockLanguages.pushString(block.recognizedLanguage)
-                    blockMap.putArray("blockLanguages", blockLanguages)
-                    for (line in block.lines) {
-                        val lineArr = WritableNativeArray()
-                        val lineMap = WritableNativeMap()
-                        val lineText = line.text
-                        lineMap.putString("lineText", lineText)
-                        val lineCornerPoints = line.cornerPoints?.let { getCornerPoints(it) }
-                        lineMap.putArray("lineCornerPoints", lineCornerPoints)
-                        val lineFrame = getFrame(line.boundingBox)
-                        lineMap.putMap("lineFrame", lineFrame)
-                        val lineLanguages = WritableNativeArray()
-                        lineLanguages.pushString(line.recognizedLanguage)
-                        lineMap.putArray("lineLanguages", lineLanguages)
-                        for (element in line.elements) {
-                            val elementArr = WritableNativeArray()
-                            val elementMap = WritableNativeMap()
-                            val elementText = element.text
-                            elementMap.putString("elementText", elementText)
-                            val elementCornerPoints = element.cornerPoints?.let { getCornerPoints(it) }
-                            elementMap.putArray("elementCornerPoints", elementCornerPoints)
-                            val elementFrame = getFrame(element.boundingBox)
-                            elementMap.putMap("elementFrame", elementFrame)
-                            elementArr.pushMap(elementMap)
-                            lineMap.putArray("elements", elementArr)
-                        }
-                        lineArr.pushMap(lineMap)
-                        blockMap.putArray("lines", lineArr)
-                    }
-                    blockArray.pushMap(blockMap)
+                if (text.text.isEmpty()) {
+                    return WritableNativeMap().toHashMap()
                 }
-                data.putArray("blocks", blockArray)
-                mediaImage.close()
-                return if (text.text.isEmpty()){
-                 WritableNativeMap().toHashMap()
-                }else {
-                data.toHashMap()
-                }
+                data.putString("resultText", text.text)
+                data.putArray("blocks", getBlocks(text.textBlocks))
+                it.close()
+                return data.toHashMap()
             } catch (e: Exception) {
-                mediaImage.close()
+                it.close()
                 e.printStackTrace()
                 return null
             }
-        } else {
-            return null
         }
-    }
-
-    private fun getCornerPoints(points: Array<Point>): WritableNativeArray {
-        val cornerPoints = WritableNativeArray()
-        for (point in points) {
-            val pointMap = WritableNativeMap()
-            pointMap.putInt("x", point.x)
-            pointMap.putInt("y", point.y)
-            cornerPoints.pushMap(pointMap)
-        }
-        return cornerPoints
-    }
-
-    private fun getFrame(boundingBox: Rect?): WritableNativeMap {
-        val frame = WritableNativeMap()
-        if (boundingBox != null) {
-            frame.putDouble("x", boundingBox.exactCenterX().toDouble())
-            frame.putDouble("y", boundingBox.exactCenterY().toDouble())
-            frame.putInt("width", boundingBox.width())
-            frame.putInt("height", boundingBox.height())
-            frame.putInt("boundingCenterX", boundingBox.centerX())
-            frame.putInt("boundingCenterY", boundingBox.centerY())
-        }
-        return frame
+        return null
     }
 
     private fun getFrameRotation(orientation: Orientation): Int {
@@ -150,4 +83,72 @@ class VisionCameraTextRecognitionModule(proxy: VisionCameraProxy, options: Map<S
             Orientation.LANDSCAPE_RIGHT -> 270
         }
     }
+   companion object{
+       fun getBlocks(blocks: MutableList<Text.TextBlock>): WritableNativeArray {
+           val blockArray = WritableNativeArray()
+               blocks.forEach { block ->
+               val blockMap = WritableNativeMap().apply {
+                   putString("blockText", block.text)
+                   putArray("blockCornerPoints", block.cornerPoints?.let { getCornerPoints(it) })
+                   putMap("blockFrame", getFrame(block.boundingBox))
+                   putArray("lines", getLines(block.lines))
+               }
+               blockArray.pushMap(blockMap)
+           }
+           return blockArray
+       }
+       private fun getLines(lines: MutableList<Text.Line>): WritableNativeArray {
+           val lineArray = WritableNativeArray()
+           lines.forEach { line ->
+               val lineMap = WritableNativeMap().apply {
+                   putString("lineText", line.text)
+                   putArray("lineCornerPoints", line.cornerPoints?.let { getCornerPoints(it) })
+                   putMap("lineFrame", getFrame(line.boundingBox))
+                   putArray("lineLanguages", WritableNativeArray().apply { pushString(line.recognizedLanguage) })
+                   putArray("elements", getElements(line.elements))
+               }
+               lineArray.pushMap(lineMap)
+           }
+           return lineArray
+       }
+
+       private fun getElements(elements: MutableList<Text.Element>): WritableNativeArray {
+           val elementArray = WritableNativeArray()
+           elements.forEach { element ->
+               val elementMap = WritableNativeMap().apply {
+                   putString("elementText", element.text)
+                   putArray("elementCornerPoints", element.cornerPoints?.let { getCornerPoints(it) })
+                   putMap("elementFrame", getFrame(element.boundingBox))
+               }
+               elementArray.pushMap(elementMap)
+           }
+           return elementArray
+       }
+
+       private fun getCornerPoints(points: Array<Point>): WritableNativeArray {
+           val cornerPoints = WritableNativeArray()
+           points.forEach { point ->
+               cornerPoints.pushMap(WritableNativeMap().apply {
+                   putInt("x", point.x)
+                   putInt("y", point.y)
+               })
+           }
+           return cornerPoints
+       }
+
+       private fun getFrame(boundingBox: Rect?): WritableNativeMap {
+           return WritableNativeMap().apply {
+               boundingBox?.let {
+                   putDouble("x", it.exactCenterX().toDouble())
+                   putDouble("y", it.exactCenterY().toDouble())
+                   putInt("width", it.width())
+                   putInt("height", it.height())
+                   putInt("boundingCenterX", it.centerX())
+                   putInt("boundingCenterY", it.centerY())
+               }
+           }
+       }
+   }
 }
+
+

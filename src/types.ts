@@ -127,3 +127,9 @@ type ElementsData = [
   elementFrame: FrameType,
   elementText: string,
 ];
+
+export type PhotoOptions = {
+  uri: string;
+  width: number;
+  height: number;
+};

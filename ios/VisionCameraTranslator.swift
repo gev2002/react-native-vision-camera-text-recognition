@@ -85,7 +85,6 @@ public class VisionCameraTranslator: FrameProcessorPlugin {
         }
     }
     private func translateText(text: String, completion: @escaping (String?) -> Void) {
-        //self.translatedText = ""
         if !isDownloaded {
             print("Translation model is not downloaded.")
             completion(nil)

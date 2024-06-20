@@ -23,12 +23,9 @@ export const Camera = forwardRef(function Camera(
 
   let plugin: any;
   if (mode === 'translate') {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { translate } = useTranslate(options);
-    // @ts-ignore
     plugin = translate;
   } else {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { scanText } = useTextRecognition(options);
     plugin = scanText;
   }
@@ -43,7 +40,6 @@ export const Camera = forwardRef(function Camera(
       'worklet';
       const data: Text | string = plugin(frame);
       // @ts-ignore
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       useWorklets(data);
     },
     []
@@ -75,5 +71,3 @@ export function useTranslate(options?: {}): TranslatorPlugin {
     [options]
   );
 }
-
-export { RemoveLanguageModel } from './RemoveLanguageModel';
