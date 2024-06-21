@@ -58,9 +58,11 @@ RCT_EXTERN_METHOD(remove:(NSString *)code
 
 @interface RCT_EXTERN_MODULE(PhotoRecognizerModule, NSObject)
 
-RCT_EXTERN_METHOD(process:(NSString *)buffer
-                 withResolver:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(process:(NSString *)uri
+                  orientation:(NSString *)orientation
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
 
 + (BOOL)requiresMainQueueSetup
 {

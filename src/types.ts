@@ -130,6 +130,9 @@ type ElementsData = [
 
 export type PhotoOptions = {
   uri: string;
-  width: number;
-  height: number;
+  orientation?:
+    | 'landscapeRight'
+    | 'portrait'
+    | 'portraitUpsideDown'
+    | 'landscapeLeft';
 };

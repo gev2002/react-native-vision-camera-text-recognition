@@ -5,9 +5,6 @@ A plugin to Scanning Text,Translate using ML Kit Text Recognition and ML Kit Tra
 react-native-vision-camera = 4.3.2 <br/>
 react-native-worklets-core = 1.3.3 <br/>
 
-Required if you are using Photo Recognizer. <br/>
-@bam.tech/react-native-image-resizer = 3.0.10
-
 ## 💻 Installation
 
 ```sh
@@ -149,17 +146,19 @@ import { PhotoRecognizer } from "react-native-vision-camera-text-recognition";
 
 const result = await PhotoRecognizer({
     uri:assets.uri,
-    width:assets.width,
-    height:assets.height
+    orientation: "portrait"
 })
 console.log(result);
 
 ```
-|  Name   |  Type  | Required |
-|:-------:|:------:|:--------:|
-|   uri   | string |   yes    |
-|  width  | number |   yes    |
-| height | number |   yes    |
+<h4>🚨 Orientation available only for iOS, recommendation give it when you are using Camera.</h3>
+
+|    Name     |  Type  |                           Values                            | Required | Default  |   Platform   |
+|:-----------:|:------:|:-----------------------------------------------------------:|:--------:|:--------:|:------------:|
+|     uri     | string |                                                             |   yes    |          | android, iOS |
+| orientation | string | portrait, portraitUpsideDown, landscapeLeft, landscapeRight |    no    | portrait |     iOS      |
+
+
 
 
 ### You can also remove unnecessary translation model
