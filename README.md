@@ -4,6 +4,8 @@ A plugin to Scanning Text,Translate using ML Kit Text Recognition and ML Kit Tra
 # 🚨 Required Modules
 react-native-vision-camera = 4.3.2 <br/>
 react-native-worklets-core = 1.3.3 <br/>
+
+Required if you are using Photo Recognizer. <br/>
 @bam.tech/react-native-image-resizer = 3.0.10
 
 ## 💻 Installation

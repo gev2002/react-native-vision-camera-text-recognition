@@ -1,11 +1,20 @@
 import { NativeModules, Platform } from 'react-native';
-import ImageResizer from '@bam.tech/react-native-image-resizer';
 import type { PhotoOptions, Text } from './types';
 
+let imageResizer: any;
+try {
+  imageResizer = require('@bam.tech/react-native-image-resizer');
+} catch (e) {}
+
 export async function PhotoRecognizer(options: PhotoOptions): Promise<Text> {
-  const { PhotoRecognizerModule: PhotoRecognizer } = NativeModules;
+  const { PhotoRecognizerModule } = NativeModules;
+  if (!imageResizer) {
+    throw new Error(
+      "@bam.tech/react-native-image-resizer is not installed! It's required for PhotoRecognizer."
+    );
+  }
   const { uri, width, height } = options;
-  const img = await ImageResizer.createResizedImage(
+  const img = await imageResizer.createResizedImage(
     uri,
     width,
     height,
@@ -14,13 +23,12 @@ export async function PhotoRecognizer(options: PhotoOptions): Promise<Text> {
     0,
     null
   );
-  console.log(img);
-  if (!img.path) {
+  if (!uri) {
     throw Error("Can't resolve img path");
   }
   if (Platform.OS === 'ios') {
-    return await PhotoRecognizer.process(img.path);
+    return await PhotoRecognizerModule.process(img.path);
   } else {
-    return await PhotoRecognizer.process(img.uri);
+    return await PhotoRecognizerModule.process(img.uri);
   }
 }
