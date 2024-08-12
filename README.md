@@ -2,7 +2,7 @@
 
 A plugin to Scanning Text,Translate using ML Kit Text Recognition and ML Kit Translation. With High Performance and many features.
 # 🚨 Required Modules
-react-native-vision-camera = 4.3.2 <br/>
+react-native-vision-camera = 4.5.1 <br/>
 react-native-worklets-core = 1.3.3 <br/>
 
 ## 💻 Installation
