@@ -2,31 +2,26 @@ import { VisionCameraProxy } from 'react-native-vision-camera';
 import type {
   Frame,
   TextRecognitionPlugin,
-  FrameProcessorPlugin,
-  Text
+  TextRecognitionOptions,
+  Text,
 } from './types';
-import { Platform } from 'react-native';
 
-export const LINKING_ERROR: string =
-  `The package 'react-native-vision-camera-text-recognition' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
+const LINKING_ERROR = `Can't load plugin scanText.Try cleaning cache or reinstall plugin.`;
 
 export function createTextRecognitionPlugin(
-  options: {},
+  options?: TextRecognitionOptions
 ): TextRecognitionPlugin {
-  const plugin: FrameProcessorPlugin | undefined =
-    VisionCameraProxy.initFrameProcessorPlugin('scanText', {
-      ...options,
-    });
+  const plugin = VisionCameraProxy.initFrameProcessorPlugin('scanText', {
+    ...options,
+  });
   if (!plugin) {
     throw new Error(LINKING_ERROR);
   }
   return {
-    scanText: (frame: Frame): Text => {
+    scanText: (frame: Frame): Text[] => {
       'worklet';
-      return plugin.call(frame) as unknown as Text;
+      // @ts-ignore
+      return plugin.call(frame) as Text[];
     },
   };
 }

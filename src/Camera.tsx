@@ -12,6 +12,8 @@ import type {
   ReadonlyFrameProcessor,
   TextRecognitionPlugin,
   TranslatorPlugin,
+  TextRecognitionOptions,
+  TranslatorOptions,
 } from './types';
 import { createTranslatorPlugin } from './translateText';
 
@@ -19,16 +21,20 @@ export const Camera = forwardRef(function Camera(
   props: CameraTypes,
   ref: ForwardedRef<any>
 ) {
-  const { device, callback, options = {}, mode, ...p } = props;
+  const { device, callback, options, mode, ...p } = props;
 
-  let plugin: any;
+  let plugin: TranslatorPlugin['translate'] | TextRecognitionPlugin['scanText'];
   if (mode === 'translate') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { translate } = useTranslate(options);
+
     plugin = translate;
   } else {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { scanText } = useTextRecognition(options);
     plugin = scanText;
   }
+
   const useWorklets = useRunOnJS(
     (data): void => {
       callback(data);
@@ -38,7 +44,7 @@ export const Camera = forwardRef(function Camera(
   const frameProcessor: ReadonlyFrameProcessor = useFrameProcessor(
     (frame: Frame) => {
       'worklet';
-      const data: Text | string = plugin(frame);
+      const data: Text[] | string = plugin(frame);
       // @ts-ignore
       useWorklets(data);
     },
@@ -59,15 +65,11 @@ export const Camera = forwardRef(function Camera(
   );
 });
 
-export function useTextRecognition(options?: {}): TextRecognitionPlugin {
-  return useMemo(
-    () => createTextRecognitionPlugin(options || { language: 'latin' }),
-    [options]
-  );
+export function useTextRecognition(
+  options?: TextRecognitionOptions
+): TextRecognitionPlugin {
+  return useMemo(() => createTextRecognitionPlugin(options), [options]);
 }
-export function useTranslate(options?: {}): TranslatorPlugin {
-  return useMemo(
-    () => createTranslatorPlugin(options || { from: 'en', to: 'de' }),
-    [options]
-  );
+export function useTranslate(options?: TranslatorOptions): TranslatorPlugin {
+  return useMemo(() => createTranslatorPlugin(options), [options]);
 }

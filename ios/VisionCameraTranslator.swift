@@ -20,12 +20,14 @@ public class VisionCameraTranslator: FrameProcessorPlugin {
     private var textRecognizer = TextRecognizer.textRecognizer(options: TextRecognizerOptions())
 
     public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
-        let from = options["from"]  as! String
-        let to = options["to"]  as! String
+        let from = options["from"]  as? String ?? "en"
+        let to = options["to"]  as? String ?? "de"
+
         self.from  = from
         self.to  = to
-        let sourceLanguage = TranslateLanguage(from: from) ?? .english
-        let targetLanguage = TranslateLanguage(from: to) ?? .german
+
+        let sourceLanguage = TranslateLanguage(from: self.from) ?? .english
+        let targetLanguage = TranslateLanguage(from: self.to) ?? .german
         self.translatorOptions = TranslatorOptions(sourceLanguage: sourceLanguage, targetLanguage: targetLanguage)
         self.translator = Translator.translator(options: translatorOptions)
         super.init(proxy: proxy, options: options)
@@ -35,7 +37,11 @@ public class VisionCameraTranslator: FrameProcessorPlugin {
     public override func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any {
         let buffer = frame.buffer
         let image = VisionImage(buffer: buffer)
-        image.orientation = getOrientation(orientation: frame.orientation)
+
+        let orientation = getOrientation(
+               orientation: frame.orientation
+             )
+        image.orientation = orientation
         let resultText = recognizeText(image: image)!.text
         if isDownloaded && !resultText.isEmpty {
             self.translateText(text:resultText){translatedText in
@@ -76,14 +82,20 @@ public class VisionCameraTranslator: FrameProcessorPlugin {
 
     }
     private func getOrientation(orientation: UIImage.Orientation) -> UIImage.Orientation {
-        switch orientation.rawValue {
-        case 0: return .right
-        case 1: return .left
-        case 2: return .down
-        case 3: return .up
-        default: return .up
+        switch orientation {
+        case .up:
+          return .up
+        case .left:
+          return .right
+        case .down:
+          return .down
+        case .right:
+          return .left
+        default:
+          return .up
         }
     }
+
     private func translateText(text: String, completion: @escaping (String?) -> Void) {
         if !isDownloaded {
             print("Translation model is not downloaded.")

@@ -2,8 +2,6 @@ package com.visioncameratextrecognition
 
 import android.media.Image
 import android.util.Log
-import android.util.SparseIntArray
-import android.view.Surface
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.common.model.DownloadConditions
@@ -16,12 +14,13 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.mrousavy.camera.core.types.Orientation
 import com.mrousavy.camera.frameprocessors.Frame
 import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin
 import com.mrousavy.camera.frameprocessors.VisionCameraProxy
 
-class VisionCameraTranslator(proxy: VisionCameraProxy, options: Map<String, Any>?) :
+private const val TAG = "VisionCameraTranslator"
+
+class VisionCameraTranslatorPlugin(proxy: VisionCameraProxy, options: Map<String, Any>?) :
     FrameProcessorPlugin() {
 
     private val conditions = DownloadConditions.Builder().requireWifi().build()
@@ -31,7 +30,6 @@ class VisionCameraTranslator(proxy: VisionCameraProxy, options: Map<String, Any>
         .build()
     private val translator = Translation.getClient(translatorOptions)
     private var recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    private val ORIENTATIONS = SparseIntArray()
     private var from = ""
     private var to = ""
     private var models = emptyArray<String>()
@@ -39,10 +37,6 @@ class VisionCameraTranslator(proxy: VisionCameraProxy, options: Map<String, Any>
     private val modelManager = RemoteModelManager.getInstance()
     private var translatedText = ""
     init {
-        ORIENTATIONS.append(Surface.ROTATION_0, 0)
-        ORIENTATIONS.append(Surface.ROTATION_90, 90)
-        ORIENTATIONS.append(Surface.ROTATION_180, 180)
-        ORIENTATIONS.append(Surface.ROTATION_270, 270)
         this.from = options?.get("from") as? String ?: ""
         this.to = options?.get("to") as? String ?: ""
         val sourceLanguage = translateLanguage(from)
@@ -60,12 +54,11 @@ class VisionCameraTranslator(proxy: VisionCameraProxy, options: Map<String, Any>
 
     override fun callback(frame: Frame, params: MutableMap<String, Any>?) : Any? {
         val mediaImage: Image = frame.image
-        val rotation = getOrientation(frame.orientation)
-        val image = InputImage.fromMediaImage(mediaImage, rotation)
+        println(" OKKK ${ frame.imageProxy.imageInfo.rotationDegrees }")
+        val image = InputImage.fromMediaImage(mediaImage, frame.imageProxy.imageInfo.rotationDegrees)
         val task: Task<Text> = recognizer.process(image)
         try {
-            val resultText: String = Tasks.await<Text>(task).text
-            Log.d("TEXT", "TEXT $resultText")
+            val resultText: String = Tasks.await(task).text
             if (this.isDownloaded && resultText.isNotEmpty()) {
                 this.translateText(resultText)
             }
@@ -74,13 +67,12 @@ class VisionCameraTranslator(proxy: VisionCameraProxy, options: Map<String, Any>
             }
             return this.translatedText
         }catch (e:Exception){
-            Log.e("ERROR", "$e")
+            Log.e(TAG, "$e")
             return null
         }
     }
 
     private fun translateText(text: String) {
-      //  this.translatedText = ""
         translator.translate(text)
             .addOnSuccessListener {
                 this.translatedText = it
@@ -92,16 +84,6 @@ class VisionCameraTranslator(proxy: VisionCameraProxy, options: Map<String, Any>
     }
 
 
-    private fun getOrientation(
-        orientation: Orientation
-    ): Int {
-        return when (orientation) {
-            Orientation.PORTRAIT -> 0
-            Orientation.LANDSCAPE_LEFT -> 90
-            Orientation.PORTRAIT_UPSIDE_DOWN -> 180
-            Orientation.LANDSCAPE_RIGHT -> 270
-        }
-    }
     private fun downloadModel(){
         modelManager.getDownloadedModels(TranslateRemoteModel::class.java)
             .addOnSuccessListener {

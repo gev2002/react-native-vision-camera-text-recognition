@@ -1,13 +1,14 @@
-import type { Frame, FrameProcessorPlugin, TranslatorPlugin } from './types';
+import type { Frame, TranslatorPlugin, TranslatorOptions } from './types';
 import { VisionCameraProxy } from 'react-native-vision-camera';
 
-import { LINKING_ERROR } from './scanText';
+const LINKING_ERROR = `Can't load plugin translate.Try cleaning cache or reinstall plugin.`;
 
-export function createTranslatorPlugin(options: {}): TranslatorPlugin {
-  const plugin: FrameProcessorPlugin | undefined =
-    VisionCameraProxy.initFrameProcessorPlugin('translate', {
-      ...options,
-    });
+export function createTranslatorPlugin(
+  options?: TranslatorOptions
+): TranslatorPlugin {
+  const plugin = VisionCameraProxy.initFrameProcessorPlugin('translate', {
+    ...options,
+  });
   if (!plugin) {
     throw new Error(LINKING_ERROR);
   }

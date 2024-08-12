@@ -10,10 +10,10 @@ class VisionCameraTextRecognitionPackage : ReactPackage {
     companion object {
         init {
             FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanText") { proxy, options ->
-                VisionCameraTextRecognitionModule(proxy, options)
+                VisionCameraTextRecognitionPlugin(proxy, options)
             }
             FrameProcessorPluginRegistry.addFrameProcessorPlugin("translate") { proxy, options ->
-                VisionCameraTranslator(proxy, options)
+                VisionCameraTranslatorPlugin(proxy, options)
             }
         }
     }

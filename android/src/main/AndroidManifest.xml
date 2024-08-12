@@ -1,3 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.visioncameratextrecognition">
+    <application>
+        <meta-data
+                android:name="com.google.mlkit.vision.DEPENDENCIES"
+                android:value="ocr,ocr_chinese,ocr_devanagari,ocr_japanese,ocr_korean" />
+    </application>
 </manifest>
+
+
+
+
+
