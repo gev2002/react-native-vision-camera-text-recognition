@@ -30,7 +30,7 @@ class PhotoRecognizerModule(reactContext: ReactApplicationContext) :
                 promise.resolve(WritableNativeMap())
             }
             data.putString("resultText", text.text)
-            data.putArray("blocks", VisionCameraTextRecognitionModule.getBlocks(text.textBlocks))
+            data.putArray("blocks", VisionCameraTextRecognitionPlugin.getBlocks(text.textBlocks))
              promise.resolve(data)
         } catch (e: Exception) {
             e.printStackTrace()
