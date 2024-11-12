@@ -18,10 +18,10 @@ export function createTextRecognitionPlugin(
     throw new Error(LINKING_ERROR);
   }
   return {
-    scanText: (frame: Frame): Text[] => {
+    scanText: (frame: Frame): Text => {
       'worklet';
       // @ts-ignore
-      return plugin.call(frame) as Text[];
+      return plugin.call(frame) as Text;
     },
   };
 }

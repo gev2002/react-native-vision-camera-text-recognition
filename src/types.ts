@@ -68,8 +68,16 @@ export type Languages =
   | 'vi'
   | 'cy';
 
+export type ScanRegion = {
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+}
+
 export type TextRecognitionOptions = {
   language: 'latin' | 'chinese' | 'devanagari' | 'japanese' | 'korean';
+  scanRegion?: ScanRegion
 };
 
 export type TranslatorOptions = {
@@ -85,27 +93,26 @@ export type CameraTypes = {
   | { mode: 'translate'; options: TranslatorOptions }
   );;
 
-
-
 export type TextRecognitionPlugin = {
-  scanText: (frame: Frame) => Text[];
+  scanText: (frame: Frame) => Text;
 };
+
 export type TranslatorPlugin = {
   translate: (frame: Frame) => string;
 };
 
 export type Text = {
-  blocks: BlocksData;
+  blocks: BlocksData[];
   resultText: string;
 };
 
-type BlocksData = [
+type BlocksData = {
   blockFrame: FrameType,
   blockCornerPoints: CornerPointsType,
   lines: LinesData,
   blockLanguages: string[] | [],
   blockText: string,
-];
+};
 
 type CornerPointsType = [{ x: number; y: number }];
 

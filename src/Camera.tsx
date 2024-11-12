@@ -44,7 +44,7 @@ export const Camera = forwardRef(function Camera(
   const frameProcessor: ReadonlyFrameProcessor = useFrameProcessor(
     (frame: Frame) => {
       'worklet';
-      const data: Text[] | string = plugin(frame);
+      const data: Text | string = plugin(frame);
       // @ts-ignore
       useWorklets(data);
     },
