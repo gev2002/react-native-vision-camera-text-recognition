@@ -42,7 +42,7 @@ class VisionCameraTextRecognitionPlugin(proxy: VisionCameraProxy, options: Map<S
         }
     }
 
-    override fun callback(frame: Frame, arguments: Map<String, Any>?): HashMap<String, Any>? {
+    override fun callback(frame: Frame, arguments: Map<String, Any>?): HashMap<String, Any?>? {
         val data = WritableNativeMap()
         val mediaImage: Image = frame.image
         val image =
